@@ -102,12 +102,12 @@ resource "azurerm_linux_virtual_machine" "flask-app-vm" {
   }
 }
 
-resource "local_file" "ansible_inventory" {
-  content = <<EOT
-[flask_servers]
-${azurerm_public_ip.flask-app-public_ip.ip_address} ansible_user=flaskappuser ansible_ssh_private_key_file=~/.ssh/id_rsa
-EOT
+# resource "local_file" "ansible_inventory" {
+#   content = <<EOT
+# [flask_servers]
+# ${azurerm_public_ip.flask-app-public_ip.ip_address} ansible_user=flaskappuser ansible_ssh_private_key_file=~/.ssh/id_rsa
+# EOT
 
-  filename = "../ansible/inventory.ini"
+#   filename = "../ansible/inventory.ini"
 
-}
+# }
