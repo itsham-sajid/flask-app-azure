@@ -1,0 +1,25 @@
+name: Lint Python Code
+
+on:
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  pylint:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.6
+
+      - name: Install pylint
+        run: pip install pylint
+
+      - name: Run pylint
+        run: pylint flask-app/*.py
