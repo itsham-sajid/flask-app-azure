@@ -21,5 +21,8 @@ jobs:
       - name: Install pylint
         run: pip install pylint
 
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
       - name: Run pylint
         run: pylint flask-app/*.py
