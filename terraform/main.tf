@@ -109,4 +109,5 @@ ${azurerm_public_ip.flask-app-public_ip.ip_address} ansible_user=flaskappuser an
 EOT
 
   filename = "../ansible/inventory.ini"
+
 }
