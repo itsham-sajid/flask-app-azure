@@ -46,7 +46,7 @@ jobs:
 
       - name: List Files and Directories (Pre-Inventory File)
         run: ls -lh
-        working-directory: terraform
+        working-directory: ansible
 
       - name: Generate Inventory File
         run: |
