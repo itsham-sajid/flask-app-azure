@@ -47,7 +47,8 @@ jobs:
       - name: Generate Inventory File
         run: |
           PUBLIC_IP=$(terraform output -raw public_ip_address)
-          cat <<EOT > ../ansible/inventory.ini
+          echo "Resolved PUBLIC_IP: $PUBLIC_IP" # Debug step to verify the output
+          cat <<EOT > ansible/inventory.ini
           [flask_servers]
           $PUBLIC_IP ansible_user=flaskappuser ansible_ssh_private_key_file=~/.ssh/id_rsa
           EOT
