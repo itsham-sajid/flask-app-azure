@@ -77,7 +77,7 @@ resource "azurerm_linux_virtual_machine" "flask-app-vm" {
   location              = azurerm_resource_group.rg-flask-app.location
   resource_group_name   = azurerm_resource_group.rg-flask-app.name
   network_interface_ids = [azurerm_network_interface.flask-app-nic.id]
-  size                  = "Standard_B1ls"
+  size                  = "Standard_B1s"
 
   os_disk {
     name                 = "flask-app-OsDisk"
@@ -87,8 +87,8 @@ resource "azurerm_linux_virtual_machine" "flask-app-vm" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 
