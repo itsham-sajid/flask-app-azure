@@ -27,7 +27,7 @@ resource "azurerm_network_security_group" "flask-app-nsg" {
   name                = "flask-app-NetworkSecurityGroup"
   location            = azurerm_resource_group.rg-flask-app.location
   resource_group_name = azurerm_resource_group.rg-flask-app.name
-  
+
   security_rule {
     name                       = "SSH"
     priority                   = 200
