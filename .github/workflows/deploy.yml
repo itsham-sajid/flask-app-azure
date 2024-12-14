@@ -53,6 +53,11 @@ jobs:
           EOT
         working-directory: terraform
 
+      - name: Echo Inventory File Contents
+        run: |
+          echo "Contents of inventory.ini:"
+          cat ansible/inventory.ini
+
       - name: Install Ansible
         run: |
           sudo apt update
@@ -60,5 +65,5 @@ jobs:
 
       - name: Run Ansible Playbook
         run: ansible-playbook -i ansible/inventory.ini ansible/flask-playbook.yml -e "tmdb_api_key=${{ secrets.TMDB_API_KEY }}"
-      
+
 
