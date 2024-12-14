@@ -110,7 +110,4 @@ EOT
 
   filename = "../ansible/inventory.ini"
 
-    triggers = {
-      recreate = "force_update"
-  }
 }

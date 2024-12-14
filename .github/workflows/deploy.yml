@@ -44,10 +44,13 @@ jobs:
         run: terraform apply -auto-approve tfplan
         working-directory: terraform
 
-      - name: Add Public IP to SSH Known Hosts
+      - name: Generate Inventory File
         run: |
           PUBLIC_IP=$(terraform output -raw public_ip_address)
-          ssh-keyscan -H $PUBLIC_IP >> ~/.ssh/known_hosts
+          cat <<EOT > ../ansible/inventory.ini
+          [flask_servers]
+          $PUBLIC_IP ansible_user=flaskappuser ansible_ssh_private_key_file=~/.ssh/id_rsa
+          EOT
         working-directory: terraform
 
       - name: Install Ansible
@@ -57,3 +60,5 @@ jobs:
 
       - name: Run Ansible Playbook
         run: ansible-playbook -i ansible/inventory.ini ansible/flask-playbook.yml -e "tmdb_api_key=${{ secrets.TMDB_API_KEY }}"
+      
+
