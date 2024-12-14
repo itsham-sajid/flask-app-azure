@@ -3,7 +3,7 @@ name: Terraform Plan on PR
 on:
   pull_request:
     branches:
-      - main
+      - master
 
 env:
   FLASK_APP: ${{ secrets.FLASK_APP }}

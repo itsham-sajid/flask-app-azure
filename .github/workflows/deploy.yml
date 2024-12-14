@@ -3,7 +3,7 @@ name: Terraform Apply on Merge
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   FLASK_APP: ${{ secrets.FLASK_APP }}
