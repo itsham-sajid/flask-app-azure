@@ -44,6 +44,10 @@ jobs:
         run: terraform apply -auto-approve tfplan
         working-directory: terraform
 
+      - name: List Files and Directories (Pre-Inventory File)
+        run: ls -lh
+        working-directory: terraform
+
       - name: Generate Inventory File
         run: |
           PUBLIC_IP=$(terraform output -raw public_ip_address)
