@@ -13,13 +13,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa.pub
-          chmod 600 ~/.ssh/id_rsa.pub
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -49,11 +42,22 @@ jobs:
           sudo apt update
           sudo apt install -y ansible jq
 
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
       - name: Add Target Hosts to SSH Known Hosts
         run: |
           PUBLIC_IP=$(ansible-inventory -i inventory.ini --list | jq -r '.flask_servers.hosts[]')
           echo "Adding $PUBLIC_IP to known_hosts"
           ssh-keyscan -H $PUBLIC_IP >> ~/.ssh/known_hosts
+        working-directory: ansible
+        
+      - name: Cat inventory
+        run: cat inventory.ini
         working-directory: ansible
 
       - name: Run Ansible Playbook
