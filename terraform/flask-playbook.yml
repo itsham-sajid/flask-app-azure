@@ -1,0 +1,61 @@
+---
+- hosts: flask_servers
+  become: true
+
+  tasks:
+    # Update apt and install required packages
+    - name: Update apt and install required packages
+      apt:
+        update_cache: yes
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - nginx
+        - python3
+        - python3-pip
+
+    # Sync Flask App Code to the Server
+    - name: Sync Flask App code to the server
+      synchronize:
+        src: ./flask-app/
+        dest: /var/www/flask-app/
+        delete: yes  # Remove files on the server that are not in the source folder
+        rsync_opts:
+          - "--chmod=D0755,F0644"  # Set proper permissions for directories and files
+
+    # Install Python dependencies globally, including Gunicorn
+    - name: Install Python dependencies
+      pip:
+        requirements: /var/www/flask-app/requirements.txt
+
+    # Add TMDB_API_KEY to a .env file
+    - name: Add TMDB_API_KEY to .env file
+      copy:
+        dest: /var/www/flask-app/.env
+        content: |
+          TMDB_API_KEY={{ tmdb_api_key }}
+        mode: '0644'
+
+    # # Configure Nginx
+    # - name: Configure Nginx
+    #   copy:
+    #     src: ./nginx/flask-app
+    #     dest: /etc/nginx/sites-available/flask-app
+    #     mode: '0644'
+
+    # - name: Enable Nginx site
+    #   file:
+    #     src: /etc/nginx/sites-available/flask-app
+    #     dest: /etc/nginx/sites-enabled
+    #     state: link
+
+    # - name: Test and reload Nginx
+    #   shell: |
+    #     nginx -t
+    #     systemctl reload nginx
+
+    # # Restart Flask App
+    # - name: Restart Flask App
+    #   systemd:
+    #     name: flask-app
+    #     state: restarted
