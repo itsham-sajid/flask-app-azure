@@ -44,24 +44,17 @@ jobs:
         run: terraform apply -auto-approve tfplan
         working-directory: terraform
 
-      - name: List Files and Directories (Pre-Inventory File)
-        run: ls -lh
-        working-directory: terraform
-
-      - name: List Files and Directories (Pre-Inventory File)
-        run: ls -lh
-        working-directory: ansible
-
-      - name: Echo Inventory File Contents
-        run: |
-          echo "Contents of inventory.ini:"
-          cat inventory.ini
-        working-directory: ansible
-
       - name: Install Ansible
         run: |
           sudo apt update
-          sudo apt install -y ansible
+          sudo apt install -y ansible jq
+
+      - name: Add Target Hosts to SSH Known Hosts
+        run: |
+          PUBLIC_IP=$(ansible-inventory -i inventory.ini --list | jq -r '.flask_servers.hosts[]')
+          echo "Adding $PUBLIC_IP to known_hosts"
+          ssh-keyscan -H $PUBLIC_IP >> ~/.ssh/known_hosts
+        working-directory: ansible
 
       - name: Run Ansible Playbook
         run: ansible-playbook -i inventory.ini flask-playbook.yml -e "tmdb_api_key=${{ secrets.TMDB_API_KEY }}"
