@@ -70,3 +70,4 @@
       systemd:
         name: flask-app
         enabled: true
+
