@@ -5,6 +5,9 @@ on:
     branches:
       - feature/*
 
+permissions:
+  contents: write
+
 jobs:
   pylint:
     name: Lint Python Code
@@ -26,21 +29,3 @@ jobs:
 
       - name: Run pylint
         run: pylint flask-app/*.py
-
-  create-pr:
-    name: Create Pull Request
-    needs: pylint
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: Apply lint fixes
-          branch: lint-auto-fix
-          base: main
-          title: "Auto-created PR: ${{ env.commit_message }}"
-          body: |
-            Lint Tests Passsed.
