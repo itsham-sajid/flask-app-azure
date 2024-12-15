@@ -39,8 +39,8 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Apply lint fixes
-          branch: lint-auto-fix
+          branch: ${{ github.ref_name }}
           base: master
           title: "Auto-created PR: ${{ env.commit_message }}"
           body: |
-            Lint Tests Passsed
+            This PR was automatically created from the branch `${{ github.ref_name }}` after passing lint tests.
