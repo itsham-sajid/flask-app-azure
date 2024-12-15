@@ -73,7 +73,7 @@ resource "azurerm_network_interface_security_group_association" "flask-app-nsg-a
 
 
 resource "azurerm_linux_virtual_machine" "flask-app-vm" {
-  name                  = "flask-app-vm"
+  name                  = "flask-app"
   location              = azurerm_resource_group.rg-flask-app.location
   resource_group_name   = azurerm_resource_group.rg-flask-app.name
   network_interface_ids = [azurerm_network_interface.flask-app-nic.id]
