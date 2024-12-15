@@ -1,0 +1,13 @@
+[Unit]
+Description=Flask App
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/flask-app
+EnvironmentFile=/var/www/flask-app/.env
+ExecStart=/usr/local/bin/gunicorn --workers 1 --bind 0.0.0.0:8000 app:app
+
+[Install]
+WantedBy=multi-user.target

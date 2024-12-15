@@ -1,0 +1,69 @@
+name: Terraform Apply on Merge
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  terraform-apply:
+    name: Terraform Plan and Apply
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ANSIBLE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa.pub
+
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.10.2
+
+      - name: Export Azure Environment Variables
+        run: |
+          echo "ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="prod.tfvars" -out=tfplan
+        working-directory: terraform
+
+      - name: Terraform Apply
+        run: terraform apply -var-file="prod.tfvars" -auto-approve tfplan
+        working-directory: terraform
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible jq
+
+      - name: Add Target Hosts to SSH Known Hosts
+        run: |
+          PUBLIC_IP=$(ansible-inventory -i inventory.ini --list | jq -r '._meta.hostvars.flask_server_prod.ansible_host')
+          ssh-keyscan -H $PUBLIC_IP >> ~/.ssh/known_hosts 2>/dev/null
+        working-directory: ansible
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -i inventory.ini flask-playbook.yml -e "tmdb_api_key=${{ secrets.TMDB_API_KEY }}"
+        working-directory: ansible
+        env:
+          ANSIBLE_PYTHON_INTERPRETER: /usr/bin/python3
+
+
+

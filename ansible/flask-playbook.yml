@@ -1,0 +1,73 @@
+---
+- hosts: flask_servers
+  become: true
+
+  tasks:
+    - name: Update apt and install required packages
+      apt:
+        update_cache: yes
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - nginx
+        - python3
+        - python3-pip
+
+    - name: Sync Flask App code to the server
+      synchronize:
+        src: ../flask-app/
+        dest: /var/www/flask-app/
+        delete: yes
+        rsync_opts:
+          - "--chmod=D0755,F0644" 
+
+    - name: Install Python dependencies
+      pip:
+        requirements: /var/www/flask-app/requirements.txt
+
+    - name: Add TMDB_API_KEY to .env file
+      copy:
+        dest: /var/www/flask-app/.env
+        content: |
+          TMDB_API_KEY={{ tmdb_api_key }}
+        mode: '0644'
+
+    - name: Configure Nginx
+      copy:
+        src: ../nginx/config
+        dest: /etc/nginx/sites-available/flask-app
+        mode: '0644'
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/flask-app
+        dest: /etc/nginx/sites-enabled/flask-app
+        state: link
+
+    - name: Disable default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Reload Nginx to apply changes
+      shell: systemctl reload nginx
+
+    - name: Deploy Flask App systemd service
+      copy:
+        src: ../flask-app/flask-app.service
+        dest: /etc/systemd/system/flask-app.service
+        mode: '0644'
+
+    - name: Reload systemd
+      shell: systemctl daemon-reload
+
+    - name: Restart Flask App service
+      systemd:
+        name: flask-app
+        state: restarted
+
+    - name: Enable Flask App service
+      systemd:
+        name: flask-app
+        enabled: true
+
