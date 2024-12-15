@@ -60,7 +60,14 @@ jobs:
           ssh-keyscan -H $PUBLIC_IP >> ~/.ssh/known_hosts
         working-directory: ansible
 
+      - name: Ansible Inventory List
+        run: ansible-inventory -i inventory.ini --list
+        working-directory: ansible
+
+
       - name: Run Ansible Playbook
         run: ansible-playbook -i inventory.ini flask-playbook.yml -e "tmdb_api_key=${{ secrets.TMDB_API_KEY }}"
         working-directory: ansible
+
+
 
