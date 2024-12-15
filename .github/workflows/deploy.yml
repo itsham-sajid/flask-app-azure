@@ -48,16 +48,16 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y ansible jq
+        
+      - name: Cat inventory
+        run: cat inventory.ini
+        working-directory: ansible
 
       - name: Add Target Hosts to SSH Known Hosts
         run: |
           PUBLIC_IP=$(ansible-inventory -i inventory.ini --list | jq -r '.flask_servers.hosts[]')
           echo "Adding $PUBLIC_IP to known_hosts"
           ssh-keyscan -H $PUBLIC_IP >> ~/.ssh/known_hosts
-        working-directory: ansible
-        
-      - name: Cat inventory
-        run: cat inventory.ini
         working-directory: ansible
 
       - name: Run Ansible Playbook
