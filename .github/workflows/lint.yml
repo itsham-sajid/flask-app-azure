@@ -40,7 +40,7 @@ jobs:
         with:
           commit-message: Apply lint fixes
           branch: lint-auto-fix
-          base: main
+          base: master
           title: "Auto-created PR: ${{ env.commit_message }}"
           body: |
             Lint Tests Passsed
