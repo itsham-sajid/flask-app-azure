@@ -98,7 +98,7 @@ resource "azurerm_linux_virtual_machine" "flask-app-vm" {
 
   admin_ssh_key {
     username   = "flaskappuser"
-    public_key = file("~/.ssh/id_rsa")
+    public_key = file("~/.ssh/id_rsa.pub")
   }
 }
 
