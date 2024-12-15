@@ -61,10 +61,10 @@
     - name: Reload systemd
       shell: systemctl daemon-reload
 
-    - name: Start Flask App service
+    - name: Restart Flask App service
       systemd:
         name: flask-app
-        state: started
+        state: restarted
 
     - name: Enable Flask App service
       systemd:
