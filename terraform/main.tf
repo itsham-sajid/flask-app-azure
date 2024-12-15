@@ -1,30 +1,31 @@
 resource "azurerm_resource_group" "rg-flask-app" {
-  name     = "rg-flask-app"
-  location = "UK South"
+  name     = var.resource_group_name
+  location = var.location
 }
+
 resource "azurerm_virtual_network" "flask-app-network" {
-  name                = "flask-app-network"
+  name                = var.vnet_name
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg-flask-app.location
   resource_group_name = azurerm_resource_group.rg-flask-app.name
 }
 
 resource "azurerm_subnet" "flask-app-subnet" {
-  name                 = "flask-app-subnet"
+  name                 = var.subnet_name
   resource_group_name  = azurerm_resource_group.rg-flask-app.name
   virtual_network_name = azurerm_virtual_network.flask-app-network.name
   address_prefixes     = ["10.0.1.0/24"]
 }
 
 resource "azurerm_public_ip" "flask-app-public_ip" {
-  name                = "flask-app-PublicIP"
+  name                = var.public_ip_name
   location            = azurerm_resource_group.rg-flask-app.location
   resource_group_name = azurerm_resource_group.rg-flask-app.name
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_network_security_group" "flask-app-nsg" {
-  name                = "flask-app-NetworkSecurityGroup"
+  name                = var.nsg_name
   location            = azurerm_resource_group.rg-flask-app.location
   resource_group_name = azurerm_resource_group.rg-flask-app.name
 
@@ -54,7 +55,7 @@ resource "azurerm_network_security_group" "flask-app-nsg" {
 }
 
 resource "azurerm_network_interface" "flask-app-nic" {
-  name                = "flask-app-myNIC"
+  name                = var.network_interface_name
   location            = azurerm_resource_group.rg-flask-app.location
   resource_group_name = azurerm_resource_group.rg-flask-app.name
 
@@ -71,44 +72,41 @@ resource "azurerm_network_interface_security_group_association" "flask-app-nsg-a
   network_security_group_id = azurerm_network_security_group.flask-app-nsg.id
 }
 
-
 resource "azurerm_linux_virtual_machine" "flask-app-vm" {
-  name                  = "flask-app"
+  name                  = var.vm_name
   location              = azurerm_resource_group.rg-flask-app.location
   resource_group_name   = azurerm_resource_group.rg-flask-app.name
   network_interface_ids = [azurerm_network_interface.flask-app-nic.id]
-  size                  = "Standard_B1s"
+  size                  = var.vm_size
 
   os_disk {
-    name                 = "flask-app-OsDisk"
+    name                 = var.os_disk_name
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
 
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
+    publisher = var.publisher
+    offer     = var.offer
+    sku       = var.sku
+    version   = var.image_version
   }
 
-  computer_name                   = "flask-app-vm"
-  admin_username                  = "flaskappuser"
+  computer_name                   = var.vm_name
+  admin_username                  = var.username
   disable_password_authentication = true
 
   admin_ssh_key {
-    username   = "flaskappuser"
-    public_key = file("~/.ssh/id_rsa.pub")
+    username   = var.username
+    public_key = file(var.public_key_path)
   }
 }
 
 resource "local_file" "ansible_inventory" {
   content = <<EOT
 [flask_servers]
-${azurerm_public_ip.flask-app-public_ip.ip_address} ansible_user=flaskappuser ansible_ssh_private_key_file=~/.ssh/id_rsa
+${azurerm_public_ip.flask-app-public_ip.ip_address} ansible_user=${var.username} ansible_ssh_private_key_file=~/.ssh/id_rsa
 EOT
 
-  filename = "../ansible/inventory.ini"
-
+  filename = var.ansible_inventory_filename
 }
-
